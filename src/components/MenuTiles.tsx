@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   ImageSourcePropType,
+  FlatList,
 } from 'react-native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 
@@ -148,16 +149,19 @@ export const MenuTiles: React.FC = () => {
   }, [tilesData]);
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      {tilesData.map(tile => (
+    <FlatList
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      data={tilesData}
+      renderItem={({item}) => (
         <TouchableOpacity
           style={styles.container}
-          onPress={() => tile.onPress(navigation)}>
-          <Image source={tile.imageSrc} style={styles.image} />
-          <Text style={styles.title}>{tile.title}</Text>
+          onPress={() => item.onPress(navigation)}>
+          <Image source={item.imageSrc} style={styles.image} />
+          <Text style={styles.title}>{item.title}</Text>
         </TouchableOpacity>
-      ))}
-    </ScrollView>
+      )}
+    />
   );
 };
 
