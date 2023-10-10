@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, ActivityIndicator} from 'react-native';
+import {StyleSheet, ActivityIndicator, FlatList} from 'react-native';
 import {Card, Text, Button} from '@rneui/themed';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
@@ -12,7 +12,7 @@ type TNews = {
 };
 
 export const NewsFeed: React.FC = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<TNews[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -31,35 +31,36 @@ export const NewsFeed: React.FC = () => {
     }, 5000);
   }, []);
 
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+
   return (
-    <ScrollView
-      style={styles.container}
+    <FlatList
       horizontal
-      showsHorizontalScrollIndicator={false}>
-      {loading ? (
-        <ActivityIndicator />
-      ) : (
-        data.map((news: TNews) => (
-          <Card key={news.id} containerStyle={styles.newsItem}>
-            <Card.Image
-              source={require('../assets/goa-ai.png')}
-              style={styles.newsImage}
-            />
-            <Text style={styles.newsTitle}>{news.title}</Text>
-            <Button
-              size="sm"
-              type="clear"
-              onPress={() =>
-                navigation.navigate('Details', {
-                  postId: `${news.id}`,
-                })
-              }>
-              Learn More
-            </Button>
-          </Card>
-        ))
+      style={styles.container}
+      showsHorizontalScrollIndicator={false}
+      data={data}
+      renderItem={({item}) => (
+        <Card containerStyle={styles.newsItem}>
+          <Card.Image
+            source={require('../assets/goa-ai.png')}
+            style={styles.newsImage}
+          />
+          <Text style={styles.newsTitle}>{item.title}</Text>
+          <Button
+            size="sm"
+            type="clear"
+            onPress={() =>
+              navigation.navigate('Details', {
+                postId: `${item.id}`,
+              })
+            }>
+            Learn More
+          </Button>
+        </Card>
       )}
-    </ScrollView>
+    />
   );
 };
 
