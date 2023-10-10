@@ -1,12 +1,10 @@
 import {
-  NavigationAction,
   NavigationProp,
   useNavigation,
 } from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Image,
   Text,
@@ -79,12 +77,6 @@ const initialTilesData: TileData[] = [
     onPress: () => alert('Feature Pressed!'),
   },
   {
-    id: '9',
-    title: 'Feature',
-    imageSrc: require('../assets/button.png'),
-    onPress: () => alert('Feature Pressed!'),
-  },
-  {
     id: '10',
     title: 'Feature',
     imageSrc: require('../assets/button.png'),
@@ -132,27 +124,22 @@ const initialTilesData: TileData[] = [
     imageSrc: require('../assets/button.png'),
     onPress: () => alert('Feature Pressed!'),
   },
+  {
+    id: '18',
+    title: 'Feature',
+    imageSrc: require('../assets/button.png'),
+    onPress: () => alert('Feature Pressed!'),
+  },
 ];
 
 export const MenuTiles: React.FC = () => {
-  const [tilesData, setTilesData] = useState<TileData[]>(initialTilesData);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>(); // Instantiate navigation
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const updatedData = tilesData.map(tile => ({
-        ...tile,
-        title: `${tile.title}`,
-      }));
-      setTilesData(updatedData);
-    }, 3000);
-    return () => clearInterval(intervalId);
-  }, [tilesData]);
 
   return (
     <FlatList
       horizontal
       showsHorizontalScrollIndicator={false}
-      data={tilesData}
+      data={initialTilesData}
       renderItem={({item}) => (
         <TouchableOpacity
           style={styles.container}
