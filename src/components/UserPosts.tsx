@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,9 @@ import {
   Button,
   StyleSheet,
   ScrollView,
+  FlatList,
 } from 'react-native';
+import {useDebounce} from '@uidotdev/usehooks';
 
 export type TPost = {
   id: string;
@@ -32,6 +34,7 @@ export const UserPosts = () => {
   const [posts, setPosts] = useState<TPost[]>([]);
   const [query, setQuery] = useState('');
   const [filteredData, setFilteredData] = useState<TPost[]>([]);
+  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/posts')
@@ -55,12 +58,12 @@ export const UserPosts = () => {
   useEffect(() => {
     setFilteredData(
       posts.filter(item =>
-        item.title.toLowerCase().includes(query.toLowerCase()),
+        item.title.toLowerCase().includes(debouncedQuery.toLowerCase()),
       ),
     );
-    console.log(posts, query);
+    console.warn(posts, debouncedQuery);
     // This will cause the FlatList to re-render with every change in the query, even if data hasn't changed
-  }, [query, posts]);
+  }, [debouncedQuery, posts]);
 
   const handleLike = (postId: string) => {
     setPosts(
@@ -79,11 +82,13 @@ export const UserPosts = () => {
         value={query}
         onChangeText={setQuery} // This causes the query state to update and triggers the filter effect
       />
-      <ScrollView>
-        {filteredData.map(post => (
-          <Post post={post} onLike={() => handleLike(post.id)} />
-        ))}
-      </ScrollView>
+      <FlatList
+        data={filteredData}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
+          <Post post={item} onLike={() => handleLike(item.id)} />
+        )}
+      />
     </View>
   );
 };

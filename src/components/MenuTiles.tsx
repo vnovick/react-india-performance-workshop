@@ -1,17 +1,16 @@
 import {
-  NavigationAction,
   NavigationProp,
   useNavigation,
 } from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Image,
   Text,
   TouchableOpacity,
   ImageSourcePropType,
+  FlatList,
 } from 'react-native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 
@@ -78,12 +77,6 @@ const initialTilesData: TileData[] = [
     onPress: () => alert('Feature Pressed!'),
   },
   {
-    id: '9',
-    title: 'Feature',
-    imageSrc: require('../assets/button.png'),
-    onPress: () => alert('Feature Pressed!'),
-  },
-  {
     id: '10',
     title: 'Feature',
     imageSrc: require('../assets/button.png'),
@@ -131,33 +124,31 @@ const initialTilesData: TileData[] = [
     imageSrc: require('../assets/button.png'),
     onPress: () => alert('Feature Pressed!'),
   },
+  {
+    id: '18',
+    title: 'Feature',
+    imageSrc: require('../assets/button.png'),
+    onPress: () => alert('Feature Pressed!'),
+  },
 ];
 
 export const MenuTiles: React.FC = () => {
-  const [tilesData, setTilesData] = useState<TileData[]>(initialTilesData);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>(); // Instantiate navigation
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const updatedData = tilesData.map(tile => ({
-        ...tile,
-        title: `${tile.title}`,
-      }));
-      setTilesData(updatedData);
-    }, 3000);
-    return () => clearInterval(intervalId);
-  }, [tilesData]);
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      {tilesData.map(tile => (
+    <FlatList
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      data={initialTilesData}
+      renderItem={({item}) => (
         <TouchableOpacity
           style={styles.container}
-          onPress={() => tile.onPress(navigation)}>
-          <Image source={tile.imageSrc} style={styles.image} />
-          <Text style={styles.title}>{tile.title}</Text>
+          onPress={() => item.onPress(navigation)}>
+          <Image source={item.imageSrc} style={styles.image} />
+          <Text style={styles.title}>{item.title}</Text>
         </TouchableOpacity>
-      ))}
-    </ScrollView>
+      )}
+    />
   );
 };
 

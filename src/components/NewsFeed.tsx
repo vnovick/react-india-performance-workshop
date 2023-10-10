@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ScrollView, StyleSheet, ActivityIndicator} from 'react-native';
+import {StyleSheet, ActivityIndicator, FlatList} from 'react-native';
 import {Card, Text, Button} from '@rneui/themed';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
@@ -12,54 +12,68 @@ type TNews = {
 };
 
 export const NewsFeed: React.FC = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<TNews[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
-    setInterval(() => {
-      fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
-        .then(response => response.json())
-        .then(json => {
-          setData(json);
-          setLoading(false);
-        })
-        .catch(error => console.error(error))
-        .finally(() => setLoading(false));
+    let intervalFetch: NodeJS.Timeout;
 
-      // Continuously fetching new posts every 5 seconds without clearing interval
-    }, 5000);
-  }, []);
+    const unsubscribeNavFocus = navigation.addListener('focus', () => {
+      intervalFetch = setInterval(() => {
+        fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+          .then(response => response.json())
+          .then(json => {
+            setData(json);
+            setLoading(false);
+          })
+          .catch(error => console.error(error))
+          .finally(() => setLoading(false));
+
+        // Continuously fetching new posts every 5 seconds without clearing interval
+      }, 5000);
+    });
+
+    const unsubscribeNavBlur = navigation.addListener('blur', () => {
+      clearInterval(intervalFetch);
+    });
+
+    return () => {
+      unsubscribeNavFocus();
+      unsubscribeNavBlur();
+    };
+  }, [navigation]);
+
+  if (loading) {
+    return <ActivityIndicator />;
+  }
 
   return (
-    <ScrollView
-      style={styles.container}
+    <FlatList
       horizontal
-      showsHorizontalScrollIndicator={false}>
-      {loading ? (
-        <ActivityIndicator />
-      ) : (
-        data.map((news: TNews) => (
-          <Card key={news.id} containerStyle={styles.newsItem}>
-            <Card.Image
-              source={require('../assets/goa-ai.png')}
-              style={styles.newsImage}
-            />
-            <Text style={styles.newsTitle}>{news.title}</Text>
-            <Button
-              size="sm"
-              type="clear"
-              onPress={() =>
-                navigation.navigate('Details', {
-                  postId: `${news.id}`,
-                })
-              }>
-              Learn More
-            </Button>
-          </Card>
-        ))
+      style={styles.container}
+      showsHorizontalScrollIndicator={false}
+      data={data}
+      renderItem={({item}) => (
+        <Card containerStyle={styles.newsItem}>
+          <Card.Image
+            source={require('../assets/goa-ai.png')}
+            style={styles.newsImage}
+          />
+          <Text style={styles.newsTitle}>{item.title}</Text>
+          <Button
+            size="sm"
+            type="clear"
+            onPress={() =>
+              navigation.navigate('Details', {
+                postId: `${item.id}`,
+              })
+            }>
+            Learn More
+          </Button>
+        </Card>
       )}
-    </ScrollView>
+    />
   );
 };
 
