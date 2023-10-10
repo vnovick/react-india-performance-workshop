@@ -17,19 +17,32 @@ export const NewsFeed: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
-    setInterval(() => {
-      fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
-        .then(response => response.json())
-        .then(json => {
-          setData(json);
-          setLoading(false);
-        })
-        .catch(error => console.error(error))
-        .finally(() => setLoading(false));
+    let intervalFetch: NodeJS.Timeout;
 
-      // Continuously fetching new posts every 5 seconds without clearing interval
-    }, 5000);
-  }, []);
+    const unsubscribeNavFocus = navigation.addListener('focus', () => {
+      intervalFetch = setInterval(() => {
+        fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+          .then(response => response.json())
+          .then(json => {
+            setData(json);
+            setLoading(false);
+          })
+          .catch(error => console.error(error))
+          .finally(() => setLoading(false));
+
+        // Continuously fetching new posts every 5 seconds without clearing interval
+      }, 5000);
+    });
+
+    const unsubscribeNavBlur = navigation.addListener('blur', () => {
+      clearInterval(intervalFetch);
+    });
+
+    return () => {
+      unsubscribeNavFocus();
+      unsubscribeNavBlur();
+    };
+  }, [navigation]);
 
   if (loading) {
     return <ActivityIndicator />;
