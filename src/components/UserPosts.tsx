@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Button,
   StyleSheet,
   ScrollView,
+  FlatList,
 } from 'react-native';
 
 export type TPost = {
@@ -79,11 +80,13 @@ export const UserPosts = () => {
         value={query}
         onChangeText={setQuery} // This causes the query state to update and triggers the filter effect
       />
-      <ScrollView>
-        {filteredData.map(post => (
-          <Post post={post} onLike={() => handleLike(post.id)} />
-        ))}
-      </ScrollView>
+      <FlatList
+        data={filteredData}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
+          <Post post={item} onLike={() => handleLike(item.id)} />
+        )}
+      />
     </View>
   );
 };
